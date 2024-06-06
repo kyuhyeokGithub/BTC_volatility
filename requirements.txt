@@ -1,0 +1,5 @@
+mlflow
+hydra-core
+hydra-colorlog
+pytorch_lightning
+plotly

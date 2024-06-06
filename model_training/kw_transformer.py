@@ -7,6 +7,7 @@ from kw_transformer_layers import PositionalEncoding
 import torch
 from torch import nn
 from kw_TransformerEncoderLayer import TransformerEncoderLayer
+from dataloader import create_dataloader
 
 class TransAm(pl.LightningModule):
     def __init__(self,loss_fn,batch_size=32,feature_size=1,num_layers=1,dropout=0.1,nhead=2,
@@ -25,13 +26,14 @@ class TransAm(pl.LightningModule):
        
         self.src_mask = None
         self.pos_encoder = PositionalEncoding(feature_size)
-        self.encoder_layer = TransformerEncoderLayer(d_model=feature_size, nhead=nhead, dropout=dropout,attn_type=attn_type)
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=feature_size, nhead=nhead, dropout=dropout)
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)        
         #self.transformer_encoder = Encoder( input_size=50,heads=2, embedding_dim=feature_size, dropout_rate=dropout, N=num_layers)
         self.decoder = nn.Linear(feature_size,1)
         #self.save_hyperparameters("feature_size","batch_size", "learning_rate","weight_decay")   
         self.init_weights()
         self.save_hyperparameters()
+
     def init_weights(self):
         initrange = 0.1    
         self.decoder.bias.data.zero_()
@@ -61,22 +63,21 @@ class TransAm(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
         return optimizer
     
-    
     def train_dataloader(self):
         # REQUIRED
         # This is an essential function. Needs to be included in the code
                
-        return DataLoader(self.train_set,batch_size=128,num_workers=32)
+        return create_dataloader(self.batch_size, 0)
         
     def val_dataloader(self):
         # OPTIONAL
         #loading validation dataset
-        return DataLoader(self.val_set, batch_size=128,num_workers=32)
+        return create_dataloader(self.batch_size, 1)
 
     def test_dataloader(self):
         # OPTIONAL
         # loading test dataset
-        return DataLoader(MNIST(os.getcwd(), train=False, download=False, transform=transforms.ToTensor()), batch_size=128,num_workers=32)
+        return create_dataloader(self.batch_size, 1)
     
     #def RMSE_loss(self, logits, labels):
     #    return self.loss_fn(logits, labels)
@@ -95,7 +96,7 @@ class TransAm(pl.LightningModule):
         pred = pred.view(-1,1)
         loss = self.loss_fn(pred, y)
      
-        self.log('training_loss', loss)
+        self.log('training_loss', loss, prog_bar=True)
         return loss
 
     def validation_step(self, val_batch, batch_idx):
@@ -104,7 +105,7 @@ class TransAm(pl.LightningModule):
         pred = self.forward(x)
         pred = pred.view(-1,1)
         loss = self.loss_fn(pred, y)
-        self.log('val_loss', loss)
+        self.log('val_loss', loss, prog_bar=True)
         #print('val_loss:',loss)
         return loss
         
@@ -116,7 +117,7 @@ class TransAm(pl.LightningModule):
         pred = pred.view(-1,1)
 
         loss = self.loss_fn(pred, y)
-        self.log('Test loss', loss)
+        self.log('Test loss', loss, prog_bar=True)
      
         return loss
 

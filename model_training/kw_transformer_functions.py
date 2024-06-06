@@ -49,9 +49,9 @@ def final_dataload(batch_size,X_train, X_test, y_train, y_test ):
     train = TensorDataset(train_features, train_targets)
     test = TensorDataset(test_features, test_targets)
 
-    train_loader = DataLoader(train, batch_size=batch_size, shuffle=False, drop_last=True)
-    test_loader = DataLoader(test, batch_size=batch_size, shuffle=False, drop_last=True)
-    test_loader_one = DataLoader(test, batch_size=1, shuffle=False, drop_last=True)
+    train_loader = DataLoader(train, batch_size=batch_size, num_workers=8, shuffle=True, drop_last=True)
+    test_loader = DataLoader(test, batch_size=batch_size, num_workers=8, shuffle=False, drop_last=True)
+    test_loader_one = DataLoader(test, batch_size=1, num_workers=8, shuffle=False, drop_last=True)
     
     return train_loader, test_loader , test_loader_one, scaler 
 

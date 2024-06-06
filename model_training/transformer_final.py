@@ -35,30 +35,21 @@ from kw_transformer_multihead_attention import MultiheadAttention
 from kw_TransformerEncoderLayer import TransformerEncoderLayer
 from kw_transformer_functions import calculate_metrics, RMSELoss, RMSPELoss, plot_dataset, inverse_transform, format_predictions, plot_predictions,final_split,final_dataload
 
-df=pd.read_csv("dataset.csv")
-df = df.rename(columns={'vol_future': 'value'})
-df['date'] = pd.to_datetime(df['date'])
-df = df.set_index(['date'])
-df.index = pd.to_datetime(df.index)
 
-
-
-
-
-@hydra.main(version_base='1.2',config_path="config/model", config_name="experiment")
+@hydra.main(version_base='1.2',config_path="configs", config_name="train.yaml")
 def main(cfg):  
 
 
-    X_train, X_test, y_train, y_test = final_split(df, 'value', 0.15)
+    # X_train, X_test, y_train, y_test = final_split(df, 'value', 0.1)
 
-    train_loader,test_loader, test_loader_one,scaler=final_dataload(cfg.params.batch_size,X_train,X_test, y_train, y_test)
+    # train_loader, test_loader, test_loader_one, scaler = final_dataload(cfg.params.batch_size,X_train,X_test, y_train, y_test)
 
-    feature_size = len(X_train.columns) #input_dim 
+    # feature_size = len(X_train.columns) #input_dim 
 
     loss_fn = RMSELoss
 
     # train
-    model = TransAm(loss_fn,cfg.params.batch_size,feature_size,cfg.params.num_layers,
+    model = TransAm(loss_fn,cfg.params.batch_size, cfg.params.feature_size,cfg.params.num_layers,
                     cfg.params.dropout,cfg.params.nhead,cfg.params.attn_type,
                     cfg.params.lr,cfg.params.weight_decay)
 
@@ -75,28 +66,29 @@ def main(cfg):
     #lr_monitor = LearningRateMonitor(logging_interval='step')
 
 
-    hyperparameters = dict(num_layers=cfg.params.num_layers,feature_size=feature_size ,
-                          batch_size=cfg.params.batch_size,dropout=cfg.params.dropout,
-                           nhead=cfg.params.nhead,attn_type=cfg.params.attn_type,learning_rate=cfg.params.lr,
-                           weight_decay=cfg.params.weight_decay,n_epochs=cfg.params.n_epochs,loss_fn=loss_fn.__name__)
+    # hyperparameters = dict(num_layers=cfg.params.num_layers,feature_size=feature_size,
+    #                       batch_size=cfg.params.batch_size,dropout=cfg.params.dropout,
+    #                        nhead=cfg.params.nhead,attn_type=cfg.params.attn_type,learning_rate=cfg.params.lr,
+    #                        weight_decay=cfg.params.weight_decay,n_epochs=cfg.params.n_epochs,loss_fn=loss_fn.__name__)
 
-    mlflow.pytorch.autolog()
+    # mlflow.pytorch.autolog()
 
-
-    #logger = MLFlowLogger(save_dir="./loggercheckpoint",run_name="hydra_mlflow")
+    logger = MLFlowLogger(save_dir="./loggercheckpoint",run_name="hydra_mlflow")
     #logger = TensorBoardLogger(save_dir="./loggercheckpoint", version=1, name='kw_tensorboardlogger')
     #logger = TensorBoardLogger(save_dir=".",version=3, name='loggercheckpoint')
 
 
-    trainer = pl.Trainer(callbacks=[TQDMProgressBar(refresh_rate=0),early_stop_callback,checkpoint_callback], 
-                         max_epochs=cfg.params.n_epochs,logger=False,
-                         gpus=1 if torch.cuda.is_available() else None)
+    trainer = pl.Trainer(callbacks=[TQDMProgressBar(refresh_rate=10),early_stop_callback,checkpoint_callback], 
+                         max_epochs=cfg.params.n_epochs,
+                         log_every_n_steps=10,
+                         logger=logger,
+                         accelerator='cpu', 
+                        #  devices=-1
+                         )
 
-
-
-    with mlflow.start_run(experiment_id=cfg.mlflow.experiment_id,run_name = cfg.mlflow.run_name) as run:
-        mlflow.log_params(hyperparameters)
-        trainer.fit(model, train_loader, test_loader)
+    # with mlflow.start_run(experiment_id=cfg.mlflow.experiment_id,run_name = cfg.mlflow.run_name) as run:
+        # mlflow.log_params(hyperparameters)
+    trainer.fit(model)
 
     
 if __name__ == "__main__":
