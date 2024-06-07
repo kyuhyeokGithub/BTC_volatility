@@ -7,7 +7,7 @@ from kw_transformer_layers import PositionalEncoding
 import torch
 from torch import nn
 from kw_TransformerEncoderLayer import TransformerEncoderLayer
-from dataloader import create_dataloader
+from dataloader import create_dataloader, get_spike_threshold
 
 class TransAm(pl.LightningModule):
     def __init__(self,loss_fn,batch_size=32,feature_size=1,num_layers=1,dropout=0.1,nhead=2,
@@ -22,8 +22,8 @@ class TransAm(pl.LightningModule):
         self.learning_rate=learning_rate
         self.weight_decay=weight_decay
         self.loss_fn = loss_fn
-        print('kw_batch,feature size: ',batch_size,feature_size)   
-       
+        print(f'[batch_size x feature_size] {batch_size} x {feature_size}\n')   
+
         self.src_mask = None
         self.pos_encoder = PositionalEncoding(feature_size)
         self.encoder_layer = nn.TransformerEncoderLayer(d_model=feature_size, nhead=nhead, dropout=dropout)
@@ -33,6 +33,15 @@ class TransAm(pl.LightningModule):
         #self.save_hyperparameters("feature_size","batch_size", "learning_rate","weight_decay")   
         self.init_weights()
         self.save_hyperparameters()
+
+        self.threshold = get_spike_threshold()
+        print(self.threshold)
+        self.spike_classification = {}
+        self.spike_classification['TP'] = 0
+        self.spike_classification['FP'] = 0
+        self.spike_classification['FN'] = 0
+        self.spike_classification['TN'] = 0
+        
 
     def init_weights(self):
         initrange = 0.1    
@@ -67,17 +76,17 @@ class TransAm(pl.LightningModule):
         # REQUIRED
         # This is an essential function. Needs to be included in the code
                
-        return create_dataloader(self.batch_size, 0)
+        return create_dataloader(self.batch_size, 'train')
         
     def val_dataloader(self):
         # OPTIONAL
         #loading validation dataset
-        return create_dataloader(self.batch_size, 1)
+        return create_dataloader(self.batch_size, 'valid')
 
     def test_dataloader(self):
         # OPTIONAL
         # loading test dataset
-        return create_dataloader(self.batch_size, 1)
+        return create_dataloader(self.batch_size, 'test')
     
     #def RMSE_loss(self, logits, labels):
     #    return self.loss_fn(logits, labels)
@@ -118,7 +127,18 @@ class TransAm(pl.LightningModule):
 
         loss = self.loss_fn(pred, y)
         self.log('Test loss', loss, prog_bar=True)
-     
+
+        print(self.threshold, pred, y)
+        if self.threshold < pred and self.threshold < y :
+            self.spike_classification['TP'] += 1
+        elif self.threshold < pred and self.threshold >= y :
+            self.spike_classification['FP'] += 1
+        elif self.threshold >= pred and self.threshold < y :
+            self.spike_classification['FN'] += 1
+        elif self.threshold >= pred and self.threshold >= y :
+            self.spike_classification['TN'] += 1
+
+
         return loss
 
         

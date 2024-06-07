@@ -73,7 +73,7 @@ def main(cfg):
 
     # mlflow.pytorch.autolog()
 
-    logger = MLFlowLogger(save_dir="./loggercheckpoint",run_name="hydra_mlflow")
+    logger = MLFlowLogger(experiment_name='kh_experiment' ,save_dir="./loggercheckpoint",run_name="transformer_normal")
     #logger = TensorBoardLogger(save_dir="./loggercheckpoint", version=1, name='kw_tensorboardlogger')
     #logger = TensorBoardLogger(save_dir=".",version=3, name='loggercheckpoint')
 
@@ -89,7 +89,17 @@ def main(cfg):
     # with mlflow.start_run(experiment_id=cfg.mlflow.experiment_id,run_name = cfg.mlflow.run_name) as run:
         # mlflow.log_params(hyperparameters)
     trainer.fit(model)
-
     
+    trainer.test()
+    #print(model.spike_classification)
+    #TP = model.spike_classification['TP']
+    #FP = model.spike_classification['FP']
+    #FN = model.spike_classification['FN']
+    #TN = model.spike_classification['TN']
+    #print(f'------------- SPIKE CLASSIFICATION ---------------')
+    #print(f'[Precision] {TP/(TP+FP):.4f}')
+    #print(f'[  Recall ] {TP/(TP+FN):.4f}')
+    #print(f'[F1-score ] {2*TP/(2*TP+FN+FP):.4f}') 
+
 if __name__ == "__main__":
     main()    

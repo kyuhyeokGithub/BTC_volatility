@@ -24,36 +24,43 @@ def train_val_test_split(df, target_col, test_ratio):
 
 
 
-def final_split(df, target_col, test_ratio):
+def final_split(df, target_col, val_ratio, test_ratio):
     X, y = feature_label_split(df, target_col)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_ratio, shuffle=False)
-    return X_train, X_test, y_train, y_test
+    X_train, X_tmp, y_train, y_tmp = train_test_split(X, y, test_size=(val_ratio + test_ratio), shuffle=False)
+    X_val, X_test, y_val, y_test = train_test_split(X_tmp, y_tmp, test_size=(test_ratio/(val_ratio + test_ratio)), shuffle=False)
+    return X_train, X_val, X_test, y_train, y_val, y_test
 
 
-def final_dataload(batch_size,X_train, X_test, y_train, y_test ):
+def final_dataload(batch_size,X_train, X_val, X_test, y_train, y_val, y_test ):
 
     scaler = MinMaxScaler()
     X_train_arr = scaler.fit_transform(X_train)
+    X_val_arr = scaler.fit_transform(X_val)
     X_test_arr = scaler.transform(X_test)
 
     y_train_arr = scaler.fit_transform(y_train)
+    y_val_arr = scaler.fit_transform(y_val)
     y_test_arr = scaler.transform(y_test)
 
 
     train_features = torch.Tensor(X_train_arr)
     train_targets = torch.Tensor(y_train_arr)
 
+    val_features = torch.Tensor(X_val_arr)
+    val_targets = torch.Tensor(y_val_arr)
+
     test_features = torch.Tensor(X_test_arr)
     test_targets = torch.Tensor(y_test_arr)
 
     train = TensorDataset(train_features, train_targets)
+    val = TensorDataset(val_features, val_targets)
     test = TensorDataset(test_features, test_targets)
 
     train_loader = DataLoader(train, batch_size=batch_size, num_workers=8, shuffle=True, drop_last=True)
-    test_loader = DataLoader(test, batch_size=batch_size, num_workers=8, shuffle=False, drop_last=True)
-    test_loader_one = DataLoader(test, batch_size=1, num_workers=8, shuffle=False, drop_last=True)
+    valid_loader = DataLoader(val, batch_size=batch_size, num_workers=8, shuffle=False, drop_last=True)
+    test_loader = DataLoader(test, batch_size=1, num_workers=8, shuffle=False, drop_last=True)
     
-    return train_loader, test_loader , test_loader_one, scaler 
+    return train_loader, valid_loader , test_loader, scaler 
 
 
 def plot_predictions(df_result):
