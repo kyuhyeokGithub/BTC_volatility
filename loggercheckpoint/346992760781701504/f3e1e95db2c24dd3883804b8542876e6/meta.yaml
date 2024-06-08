@@ -1,0 +1,16 @@
+artifact_uri: file:///C:/Users/서규혁/OneDrive/바탕 화면/LFD_bitcoin/loggercheckpoint/346992760781701504/f3e1e95db2c24dd3883804b8542876e6/artifacts
+deleted_time: 1717782850776
+end_time: 1717775649682
+entry_point_name: ''
+experiment_id: '346992760781701504'
+lifecycle_stage: deleted
+run_id: f3e1e95db2c24dd3883804b8542876e6
+run_name: hydra_mlflow
+run_uuid: f3e1e95db2c24dd3883804b8542876e6
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1717774908176
+status: 3
+tags: []
+user_id: 서규혁

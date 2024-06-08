@@ -34,13 +34,14 @@ class TransAm(pl.LightningModule):
         self.init_weights()
         self.save_hyperparameters()
 
-        self.threshold = get_spike_threshold()
-        print(self.threshold)
-        self.spike_classification = {}
-        self.spike_classification['TP'] = 0
-        self.spike_classification['FP'] = 0
-        self.spike_classification['FN'] = 0
-        self.spike_classification['TN'] = 0
+        
+        #self.threshold = get_spike_threshold()
+        #print(self.threshold)
+        #self.spike_classification = {}
+        #self.spike_classification['TP'] = 0
+        #self.spike_classification['FP'] = 0
+        #self.spike_classification['FN'] = 0
+        #self.spike_classification['TN'] = 0
         
 
     def init_weights(self):
@@ -104,7 +105,9 @@ class TransAm(pl.LightningModule):
         #input to get the outcome pred from the model
         pred = pred.view(-1,1)
         loss = self.loss_fn(pred, y)
-     
+        #print(f'[TRAIN] {pred}, {y}')
+
+
         self.log('training_loss', loss, prog_bar=True)
         return loss
 
@@ -128,15 +131,15 @@ class TransAm(pl.LightningModule):
         loss = self.loss_fn(pred, y)
         self.log('Test loss', loss, prog_bar=True)
 
-        print(self.threshold, pred, y)
-        if self.threshold < pred and self.threshold < y :
-            self.spike_classification['TP'] += 1
-        elif self.threshold < pred and self.threshold >= y :
-            self.spike_classification['FP'] += 1
-        elif self.threshold >= pred and self.threshold < y :
-            self.spike_classification['FN'] += 1
-        elif self.threshold >= pred and self.threshold >= y :
-            self.spike_classification['TN'] += 1
+        #print(self.threshold, pred, y)
+        #if self.threshold < pred and self.threshold < y :
+        #    self.spike_classification['TP'] += 1
+        #elif self.threshold < pred and self.threshold >= y :
+        #    self.spike_classification['FP'] += 1
+        #elif self.threshold >= pred and self.threshold < y :
+        #    self.spike_classification['FN'] += 1
+        #elif self.threshold >= pred and self.threshold >= y :
+        #    self.spike_classification['TN'] += 1
 
 
         return loss

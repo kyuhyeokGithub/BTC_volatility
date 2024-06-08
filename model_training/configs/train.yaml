@@ -49,16 +49,16 @@ ckpt_path: null
 seed: null
 
 params:
-    batch_size: 16
+    batch_size: 4
     feature_size: 36
-    num_layers: 1
-    dropout: 0.1
-    nhead: 2
+    num_layers: 2
+    dropout: 0.2
+    nhead: 4
     attn_type: None
     lr: 1e-5
-    weight_decay: 1e-6
+    weight_decay: 1e-5
     patience: 10
-    n_epochs: 20
+    n_epochs: 1000
 
 model_checkpoint:
     outputdir: '/workspace/LFD_bitcoin/ckpt'

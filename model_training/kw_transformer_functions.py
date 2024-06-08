@@ -26,8 +26,8 @@ def train_val_test_split(df, target_col, test_ratio):
 
 def final_split(df, target_col, val_ratio, test_ratio):
     X, y = feature_label_split(df, target_col)
-    X_train, X_tmp, y_train, y_tmp = train_test_split(X, y, test_size=(val_ratio + test_ratio), shuffle=False)
-    X_val, X_test, y_val, y_test = train_test_split(X_tmp, y_tmp, test_size=(test_ratio/(val_ratio + test_ratio)), shuffle=False)
+    X_test, X_tmp, y_test, y_tmp = train_test_split(X, y, test_size=1-test_ratio, shuffle=False)
+    X_val, X_train, y_val, y_train = train_test_split(X_tmp, y_tmp, test_size=((1-val_ratio-test_ratio)/(1-test_ratio)), shuffle=False)
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 

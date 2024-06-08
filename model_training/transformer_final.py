@@ -73,7 +73,7 @@ def main(cfg):
 
     # mlflow.pytorch.autolog()
 
-    logger = MLFlowLogger(experiment_name='kh_experiment' ,save_dir="./loggercheckpoint",run_name="transformer_normal")
+    logger = MLFlowLogger(experiment_name='kh_experiment' ,save_dir="./loggercheckpoint",run_name="transformer_normal_2")
     #logger = TensorBoardLogger(save_dir="./loggercheckpoint", version=1, name='kw_tensorboardlogger')
     #logger = TensorBoardLogger(save_dir=".",version=3, name='loggercheckpoint')
 
