@@ -100,7 +100,7 @@ class TransAm(pl.LightningModule):
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
         x = x.view([self.batch_size, -1, self.feature_size]) 
-        pred = self.forward(x)
+        pred = self(x)
         # The actual forward pass is made on the 
         #input to get the outcome pred from the model
         pred = pred.view(-1,1)
@@ -114,7 +114,7 @@ class TransAm(pl.LightningModule):
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
         x = x.view([self.batch_size, -1, self.feature_size])
-        pred = self.forward(x)
+        pred = self(x)
         pred = pred.view(-1,1)
         loss = self.loss_fn(pred, y)
         self.log('val_loss', loss, prog_bar=True)
@@ -125,8 +125,11 @@ class TransAm(pl.LightningModule):
         x, y = test_batch
         
         x = x.view([batch_size, -1, self.feature_size])
-        pred = self.forward(x)
+        pred = self(x)
         pred = pred.view(-1,1)
+
+        pred = pred ** 4
+        y = y ** 4
 
         loss = self.loss_fn(pred, y)
         self.log('Test loss', loss, prog_bar=True)
@@ -150,7 +153,6 @@ class TransAm(pl.LightningModule):
         X_batch, Y_batch = batch
         preds = self(X_batch.float())
 
-
-        return preds
+        return preds ** 4
     
     
