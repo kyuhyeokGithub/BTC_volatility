@@ -33,24 +33,26 @@ def final_split(df, target_col, val_ratio, test_ratio):
 
 def final_dataload(batch_size,X_train, X_val, X_test, y_train, y_val, y_test ):
 
-    scaler = MinMaxScaler()
-    X_train_arr = scaler.fit_transform(X_train)
-    X_val_arr = scaler.fit_transform(X_val)
-    X_test_arr = scaler.transform(X_test)
+    X_train_arr = X_train
+    X_val_arr = X_val
+    X_test_arr = X_test
 
-    y_train_arr = scaler.fit_transform(y_train)
-    y_val_arr = scaler.fit_transform(y_val)
-    y_test_arr = scaler.transform(y_test)
+    #print(y_test)
+    y_train_arr = y_train
+    y_val_arr = y_val
+    y_test_arr = y_test
+    #print(y_test)
+    #print((y_test>1).count())
+    #exit()
+   
+    train_features = torch.Tensor(X_train_arr.values)
+    train_targets = torch.Tensor(y_train_arr.values)
 
+    val_features = torch.Tensor(X_val_arr.values)
+    val_targets = torch.Tensor(y_val_arr.values)
 
-    train_features = torch.Tensor(X_train_arr)
-    train_targets = torch.Tensor(y_train_arr)
-
-    val_features = torch.Tensor(X_val_arr)
-    val_targets = torch.Tensor(y_val_arr)
-
-    test_features = torch.Tensor(X_test_arr)
-    test_targets = torch.Tensor(y_test_arr)
+    test_features = torch.Tensor(X_test_arr.values)
+    test_targets = torch.Tensor(y_test_arr.values)
 
     train = TensorDataset(train_features, train_targets)
     val = TensorDataset(val_features, val_targets)
@@ -60,7 +62,7 @@ def final_dataload(batch_size,X_train, X_val, X_test, y_train, y_val, y_test ):
     valid_loader = DataLoader(val, batch_size=batch_size, num_workers=8, shuffle=False, drop_last=True)
     test_loader = DataLoader(test, batch_size=1, num_workers=8, shuffle=False, drop_last=True)
     
-    return train_loader, valid_loader , test_loader, scaler 
+    return train_loader, valid_loader , test_loader
 
 
 def plot_predictions(df_result):
@@ -184,3 +186,34 @@ def RMSELoss(yhat,y):
 
 def RMSPELoss(y_pred, y_true):
     return torch.sqrt(torch.mean( ((y_true - y_pred) / y_true) ** 2 ))
+
+
+def plot_dataframe(df) :
+    plt.figure(figsize = (10, 5))
+    plt.plot(df.index, df['value']**(10/3), linestyle='-', color='blue', marker='o', label='Volatility before Transformation')
+    plt.plot(df.index, df['value'], linestyle='-', color='red', marker = 'x', label='Volatility after Transformation')
+    plt.title('Volatility change after Transformation')
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.legend(loc='upper right')
+    plt.grid(True)
+    #plt.show()
+    plt.savefig('./plot_volatility.png')
+
+def plot_histogram_volatility(df) :
+
+    bin_width = 0.025
+    bins = np.arange(0, 2+bin_width, bin_width)
+
+    plt.figure(figsize = (10, 5))
+
+    plt.hist(df['value']**(10/3), bins=bins, alpha = 0.5, label='Volatility before Transformation', color = 'blue', edgecolor = 'k')
+    plt.hist(df['value'], bins=bins, alpha = 0.5, label='Volatility after Transformation', color = 'red', edgecolor = 'k')
+
+    plt.title('Overlayed Histograms for Volatility Transformation')
+    plt.xlabel('Volatility')
+    plt.ylabel('Frequency')
+    plt.legend(loc='upper right')
+    plt.grid(True)
+    #plt.show()
+    plt.savefig('./overlayed_histogram_volatility.png')

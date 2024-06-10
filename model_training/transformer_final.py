@@ -35,6 +35,7 @@ from kw_transformer_multihead_attention import MultiheadAttention
 from kw_TransformerEncoderLayer import TransformerEncoderLayer
 from kw_transformer_functions import calculate_metrics, RMSELoss, RMSPELoss, plot_dataset, inverse_transform, format_predictions, plot_predictions,final_split,final_dataload
 
+from dataloader import make_volatility_png
 
 @hydra.main(version_base='1.2',config_path="configs", config_name="train.yaml")
 def main(cfg):  
@@ -86,17 +87,24 @@ def main(cfg):
                         #  devices=-1
                          )
 
+    make_volatility_png()
+
     # with mlflow.start_run(experiment_id=cfg.mlflow.experiment_id,run_name = cfg.mlflow.run_name) as run:
         # mlflow.log_params(hyperparameters)
     trainer.fit(model)
     
     trainer.test()
-    #print(model.spike_classification)
-    #TP = model.spike_classification['TP']
-    #FP = model.spike_classification['FP']
-    #FN = model.spike_classification['FN']
-    #TN = model.spike_classification['TN']
-    #print(f'------------- SPIKE CLASSIFICATION ---------------')
+    print(model.spike_classification)
+    TP = model.spike_classification['TP']
+    FP = model.spike_classification['FP']
+    FN = model.spike_classification['FN']
+    TN = model.spike_classification['TN']
+    print(f'------------- SPIKE CLASSIFICATION ---------------')
+    print(f'-------------------')
+    print(f'| TP : {TP} | FP : {FP} |')
+    print(f'-------------------')
+    print(f'| FN : {FN} | TN : {TN} |')
+    print(f'-------------------')
     #print(f'[Precision] {TP/(TP+FP):.4f}')
     #print(f'[  Recall ] {TP/(TP+FN):.4f}')
     #print(f'[F1-score ] {2*TP/(2*TP+FN+FP):.4f}') 

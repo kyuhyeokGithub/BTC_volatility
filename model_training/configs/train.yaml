@@ -50,15 +50,15 @@ seed: null
 
 params:
     batch_size: 4
-    feature_size: 36
+    feature_size: 34
     num_layers: 2
     dropout: 0.2
-    nhead: 4
+    nhead: 2
     attn_type: None
     lr: 1e-5
-    weight_decay: 1e-5
-    patience: 10
-    n_epochs: 1000
+    weight_decay: 1e-6
+    patience: 100
+    n_epochs: 10000
 
 model_checkpoint:
     outputdir: '/workspace/LFD_bitcoin/ckpt'

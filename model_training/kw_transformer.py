@@ -7,7 +7,7 @@ from kw_transformer_layers import PositionalEncoding
 import torch
 from torch import nn
 from kw_TransformerEncoderLayer import TransformerEncoderLayer
-from dataloader import create_dataloader, get_spike_threshold
+from dataloader import create_dataloader
 
 class TransAm(pl.LightningModule):
     def __init__(self,loss_fn,batch_size=32,feature_size=1,num_layers=1,dropout=0.1,nhead=2,
@@ -35,13 +35,13 @@ class TransAm(pl.LightningModule):
         self.save_hyperparameters()
 
         
-        #self.threshold = get_spike_threshold()
+        self.threshold = 1
         #print(self.threshold)
-        #self.spike_classification = {}
-        #self.spike_classification['TP'] = 0
-        #self.spike_classification['FP'] = 0
-        #self.spike_classification['FN'] = 0
-        #self.spike_classification['TN'] = 0
+        self.spike_classification = {}
+        self.spike_classification['TP'] = 0
+        self.spike_classification['FP'] = 0
+        self.spike_classification['FN'] = 0
+        self.spike_classification['TN'] = 0
         
 
     def init_weights(self):
@@ -121,28 +121,31 @@ class TransAm(pl.LightningModule):
         #print('val_loss:',loss)
         return loss
         
-    def test_step(self, test_batch, batch_idx,batch_size=1):
+    def test_step(self, test_batch, batch_idx, batch_size=1):
         x, y = test_batch
         
         x = x.view([batch_size, -1, self.feature_size])
         pred = self(x)
         pred = pred.view(-1,1)
 
-        pred = pred ** 4
-        y = y ** 4
-
+        print(pred, y)
+        pred = pred ** (10/3)
+        y = y ** (10/3)
+        print(pred, y)
+        print('-----------------')
+        
         loss = self.loss_fn(pred, y)
         self.log('Test loss', loss, prog_bar=True)
 
         #print(self.threshold, pred, y)
-        #if self.threshold < pred and self.threshold < y :
-        #    self.spike_classification['TP'] += 1
-        #elif self.threshold < pred and self.threshold >= y :
-        #    self.spike_classification['FP'] += 1
-        #elif self.threshold >= pred and self.threshold < y :
-        #    self.spike_classification['FN'] += 1
-        #elif self.threshold >= pred and self.threshold >= y :
-        #    self.spike_classification['TN'] += 1
+        if self.threshold < pred and self.threshold < y :
+            self.spike_classification['TP'] += 1
+        elif self.threshold < pred and self.threshold >= y :
+            self.spike_classification['FP'] += 1
+        elif self.threshold >= pred and self.threshold < y :
+            self.spike_classification['FN'] += 1
+        elif self.threshold >= pred and self.threshold >= y :
+            self.spike_classification['TN'] += 1
 
 
         return loss
