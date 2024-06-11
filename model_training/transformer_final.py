@@ -33,7 +33,7 @@ from kw_multi_head_attention_forward import multi_head_attention_forward
 from kw_transformer_layers import PositionalEncoding
 from kw_transformer_multihead_attention import MultiheadAttention
 from kw_TransformerEncoderLayer import TransformerEncoderLayer
-from kw_transformer_functions import calculate_metrics, RMSELoss, RMSPELoss, plot_dataset, inverse_transform, format_predictions, plot_predictions,final_split,final_dataload
+from kw_transformer_functions import calculate_metrics, RMSELoss, RMSPELoss, MAELoss, MAPELoss, plot_dataset, inverse_transform, format_predictions, plot_predictions,final_split,final_dataload
 
 from dataloader import make_volatility_png
 
@@ -97,20 +97,7 @@ def main(cfg):
     trainer.fit(model)
     
     trainer.test()
-    print(model.spike_classification)
-    TP = model.spike_classification['TP']
-    FP = model.spike_classification['FP']
-    FN = model.spike_classification['FN']
-    TN = model.spike_classification['TN']
-    print(f'------------- SPIKE CLASSIFICATION ---------------')
-    print(f'-------------------')
-    print(f'| TP : {TP} | FP : {FP} |')
-    print(f'-------------------')
-    print(f'| FN : {FN} | TN : {TN} |')
-    print(f'-------------------')
-    #print(f'[Precision] {TP/(TP+FP):.4f}')
-    #print(f'[  Recall ] {TP/(TP+FN):.4f}')
-    #print(f'[F1-score ] {2*TP/(2*TP+FN+FP):.4f}') 
+    
 
 if __name__ == "__main__":
     main()    

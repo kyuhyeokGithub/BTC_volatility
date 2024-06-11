@@ -103,6 +103,7 @@ df = df.drop(df.index[0:2])
 df = df.drop(df.index[-31:])
 #df = df.drop(columns=['news_score_pos_std', 'news_score_neg_std'])
 
+
 def make_volatility_png():
     plot_dataframe(df)
     plot_histogram_volatility(df)

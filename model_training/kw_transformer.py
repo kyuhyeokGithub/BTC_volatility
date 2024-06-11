@@ -9,6 +9,7 @@ from torch import nn
 import torch.nn.functional as F
 from kw_TransformerEncoderLayer import TransformerEncoderLayer
 from dataloader import create_dataloader
+from kw_transformer_functions import MAELoss, MAPELoss, RMSELoss, RMSPELoss
 
 class TransAm(pl.LightningModule):
     def __init__(self,loss_fn,batch_size=32,feature_size=1,num_layers=1,dropout=0.1,nhead=2,
@@ -23,7 +24,10 @@ class TransAm(pl.LightningModule):
         self.learning_rate=learning_rate
         self.weight_decay=weight_decay
         self.day_window=day_window
-        self.loss_fn = loss_fn
+        self.loss_fn1 = RMSELoss
+        self.loss_fn2 = RMSPELoss
+        self.loss_fn3 = MAELoss
+        self.loss_fn4 = MAPELoss
         print(f'[batch_size x feature_size] {batch_size} x {feature_size}\n')  
 
         self.src_mask = None
@@ -111,7 +115,7 @@ class TransAm(pl.LightningModule):
         # The actual forward pass is made on the 
         #input to get the outcome pred from the model
         pred = pred.view(-1,1)
-        loss = self.loss_fn(pred, y)
+        loss = self.loss_fn1(pred, y)
         #print(f'[TRAIN] {pred}, {y}')
 
         self.log('training_loss', loss, prog_bar=True)
@@ -127,40 +131,51 @@ class TransAm(pl.LightningModule):
         pred = self(x)
         #print(pred.shape)
         pred = pred.view(-1,1)
-        loss = self.loss_fn(pred, y)
+        loss = self.loss_fn1(pred, y)
         self.log('val_loss', loss, prog_bar=True)
         #print('val_loss:',loss)
         return loss
         
-    def test_step(self, test_batch, batch_idx, batch_size=1):
+    def test_step(self, test_batch, batch_idx):
         x, y = test_batch
         
-        x = x.view([batch_size, self.feature_size, -1])
+        x = x.view([-1, self.feature_size, self.day_window])
         x = x.transpose(1,2)        
         pred = self(x)
         pred = pred.view(-1,1)
 
-        print(pred, y)
+        #print(pred, y)
         pred = pred ** (10/3)
         y = y ** (10/3)
         #print(pred, y)
         #print('-----------------')
         
-        loss = self.loss_fn(pred, y)
-        self.log('Test loss', loss, prog_bar=True)
+        #print(pred, y)
+        #print(pred.shape, y.shape)
+        rmse = self.loss_fn1(pred, y)
+        rmspe = self.loss_fn2(pred, y)
+        mae = self.loss_fn3(pred, y)
+        mape = self.loss_fn4(pred, y)
+        #print(rmse, rmspe, mae, mape)
+        #exit()
+
+
+        self.log('Test loss RMSE', rmse, prog_bar=True)
+        self.log('Test loss RMSPE', rmspe, prog_bar=True)
+        self.log('Test loss MAE', mae, prog_bar=True)
+        self.log('Test loss MAPE', mape, prog_bar=True)
 
         #print(self.threshold, pred, y)
-        if self.threshold < pred and self.threshold < y :
-            self.spike_classification['TP'] += 1
-        elif self.threshold < pred and self.threshold >= y :
-            self.spike_classification['FP'] += 1
-        elif self.threshold >= pred and self.threshold < y :
-            self.spike_classification['FN'] += 1
-        elif self.threshold >= pred and self.threshold >= y :
-            self.spike_classification['TN'] += 1
+        #if self.threshold < pred and self.threshold < y :
+        #    self.spike_classification['TP'] += 1
+        #elif self.threshold < pred and self.threshold >= y :
+        #    self.spike_classification['FP'] += 1
+        #elif self.threshold >= pred and self.threshold < y :
+        #    self.spike_classification['FN'] += 1
+        #elif self.threshold >= pred and self.threshold >= y :
+        #    self.spike_classification['TN'] += 1
 
-
-        return loss
+        return rmse
 
         
     #    print(len(losses)) ## This will be same as number of validation batches
