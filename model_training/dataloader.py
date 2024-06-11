@@ -5,6 +5,9 @@ from kw_transformer_functions import *
 
 from kw_transformer_functions import final_split, final_dataload
 
+from warnings import simplefilter
+simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
+
 with open('./model_training/configs/train.yaml') as f:
     conf = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -89,16 +92,16 @@ for idx in range(df.shape[1]):
     if df.columns[idx] != 'value':
         column_list.append(df.columns[idx])
 
-for i in range(1, window+1):
-    for col in column_list:
-        new_name = f'{i}_{col}'
-        val = (-1) * i
-        df[new_name] = df[col].shift(val)
+if window > 1 :
+    for i in range(1, window):
+        for col in column_list:
+            new_name = f'{i}_{col}'
+            val = (-1) * i
+            df[new_name] = df[col].shift(val)
 
 df = df.drop(df.index[0:2])
-df = df.drop(df.index[-window:])
+df = df.drop(df.index[-31:])
 #df = df.drop(columns=['news_score_pos_std', 'news_score_neg_std'])
-print(df.shape)
 
 def make_volatility_png():
     plot_dataframe(df)
@@ -110,7 +113,6 @@ def create_dataloader(batch_size, flag):
     #print((y_train['value']>=1).sum())
     #print((y_val['value']>=1).sum())
     #print((y_test['value']>=1).sum())
-
 
     train_loader, valid_loader , test_loader= final_dataload(batch_size, X_train, X_val, X_test, y_train, y_val, y_test)
 
