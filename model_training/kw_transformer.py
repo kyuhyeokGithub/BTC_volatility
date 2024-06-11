@@ -152,16 +152,16 @@ class TransAm(pl.LightningModule):
         
         #print(pred, y)
         #print(pred.shape, y.shape)
-        rmse = self.loss_fn1(pred, y)
-        rmspe = self.loss_fn2(pred, y)
+        # rmse = self.loss_fn1(pred, y)
+        # rmspe = self.loss_fn2(pred, y)
         mae = self.loss_fn3(pred, y)
         mape = self.loss_fn4(pred, y)
-        #print(rmse, rmspe, mae, mape)
+        # print(rmse, rmspe, mae, mape)
         #exit()
 
 
-        self.log('Test loss RMSE', rmse, prog_bar=True)
-        self.log('Test loss RMSPE', rmspe, prog_bar=True)
+        # self.log('Test loss RMSE', rmse, prog_bar=True)
+        # self.log('Test loss RMSPE', rmspe, prog_bar=True)
         self.log('Test loss MAE', mae, prog_bar=True)
         self.log('Test loss MAPE', mape, prog_bar=True)
 
@@ -175,7 +175,7 @@ class TransAm(pl.LightningModule):
         #elif self.threshold >= pred and self.threshold >= y :
         #    self.spike_classification['TN'] += 1
 
-        return rmse
+        return pred, y
 
         
     #    print(len(losses)) ## This will be same as number of validation batches
@@ -183,6 +183,6 @@ class TransAm(pl.LightningModule):
         X_batch, Y_batch = batch
         preds = self(X_batch.float())
 
-        return preds ** 4
+        return preds ** (10/3)
     
     

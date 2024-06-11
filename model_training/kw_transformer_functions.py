@@ -48,7 +48,7 @@ def final_dataload(batch_size,X_train, X_val, X_test, y_train, y_val, y_test ):
 
     train_loader = DataLoader(train, batch_size=batch_size, num_workers=8, shuffle=True, drop_last=True)
     valid_loader = DataLoader(val, batch_size=batch_size, num_workers=8, shuffle=False, drop_last=True)
-    test_loader = DataLoader(test, batch_size=X_test.shape[0], num_workers=8, shuffle=False, drop_last=True)
+    test_loader = DataLoader(test, batch_size=1, num_workers=8, shuffle=False, drop_last=True)
     
     return train_loader, valid_loader , test_loader
 
