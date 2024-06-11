@@ -32,7 +32,6 @@ class TransAm(pl.LightningModule):
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)        
         #self.transformer_encoder = Encoder( input_size=50,heads=2, embedding_dim=feature_size, dropout_rate=dropout, N=num_layers)
         self.decoder = nn.Linear(feature_size,1)
-        self.pooling = nn.Linear(day_window, 1)
         #self.save_hyperparameters("feature_size","batch_size", "learning_rate","weight_decay")   
         self.init_weights()
         self.save_hyperparameters()
@@ -56,16 +55,14 @@ class TransAm(pl.LightningModule):
         
         if self.src_mask is None or self.src_mask.size(0) != len(src):
             device = src.device
-            mask = self._generate_square_subsequent_mask(len(src)).to(device)
+            mask = self._generate_square_subsequent_mask(src.shape[1]).to(device)
             self.src_mask = mask
         
         src = self.pos_encoder(src)
 
-        output = self.transformer_encoder(src,self.src_mask)#, self.src_mask)
+        output = self.transformer_encoder(src.transpose(0,1), self.src_mask)#, self.src_mask)
+        output = torch.mean(output, dim=0)
         output = self.decoder(output)
-        output=F.relu(output)
-        output = output.squeeze(-1)
-        output = self.pooling(output)
         #output=F.relu(output)
 
         #add sigmoid function <- output=sigmoid. force output to be 0-1. and 
