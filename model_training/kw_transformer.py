@@ -11,7 +11,7 @@ from dataloader import create_dataloader
 
 class TransAm(pl.LightningModule):
     def __init__(self,loss_fn,batch_size=32,feature_size=1,num_layers=1,dropout=0.1,nhead=2,
-                 attn_type=None,learning_rate=1e-5,weight_decay=1e-6):
+                 attn_type=None,learning_rate=1e-5,weight_decay=1e-6, day_window=10):
         super(TransAm, self).__init__()
        
         self.model_type = 'Transformer'
@@ -21,6 +21,7 @@ class TransAm(pl.LightningModule):
         self.feature_size=feature_size
         self.learning_rate=learning_rate
         self.weight_decay=weight_decay
+        self.day_window=day_window
         self.loss_fn = loss_fn
         print(f'[batch_size x feature_size] {batch_size} x {feature_size}\n')   
 

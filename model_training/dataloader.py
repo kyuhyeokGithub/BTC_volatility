@@ -1,8 +1,14 @@
 import pandas as pd
 import numpy as np
+import yaml
 from kw_transformer_functions import *
 
 from kw_transformer_functions import final_split, final_dataload
+
+with open('./model_training/configs/train.yaml') as f:
+    conf = yaml.load(f, Loader=yaml.FullLoader)
+
+conf_param = conf['params']
 
 df=pd.read_csv("./workspace/bitcoin_price.csv")
 df_norm=pd.read_csv("./workspace/bitcoin_norm.csv")
@@ -75,10 +81,24 @@ df = pd.merge(df, usd_df, on='date')
 df = pd.merge(df, news_df, on='date')
 
 # df : 484 x 37 (btc,eth,usd(10x3) + news(6) + value(1,Volatility))
+
+window = conf_param['day_window']
+
+column_list = []
+for idx in range(df.shape[1]):
+    if df.columns[idx] != 'value':
+        column_list.append(df.columns[idx])
+
+for i in range(1, window+1):
+    for col in column_list:
+        new_name = f'{i}_{col}'
+        val = (-1) * i
+        df[new_name] = df[col].shift(val)
+
 df = df.drop(df.index[0:2])
-df = df.drop(df.index[-31:])
-df = df.drop(columns=['news_score_pos_std', 'news_score_neg_std'])
-#print(df.shape)
+df = df.drop(df.index[-window:])
+#df = df.drop(columns=['news_score_pos_std', 'news_score_neg_std'])
+print(df.shape)
 
 def make_volatility_png():
     plot_dataframe(df)

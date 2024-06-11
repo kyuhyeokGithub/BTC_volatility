@@ -53,6 +53,7 @@ params:
     feature_size: 34
     num_layers: 2
     dropout: 0.2
+    day_window : 10
     nhead: 2
     attn_type: None
     lr: 1e-5

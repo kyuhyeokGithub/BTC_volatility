@@ -52,7 +52,7 @@ def main(cfg):
     # train
     model = TransAm(loss_fn,cfg.params.batch_size, cfg.params.feature_size,cfg.params.num_layers,
                     cfg.params.dropout,cfg.params.nhead,cfg.params.attn_type,
-                    cfg.params.lr,cfg.params.weight_decay)
+                    cfg.params.lr,cfg.params.weight_decay, cfg.params.day_window)
 
 
     early_stop_callback = EarlyStopping(monitor="val_loss", patience=cfg.params.patience, verbose=0, 
