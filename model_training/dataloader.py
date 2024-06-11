@@ -99,9 +99,18 @@ if window > 1 :
             val = (-1) * i
             df[new_name] = df[col].shift(val)
 
+
+#df = df.drop(columns=['news_score_pos_std', 'news_score_neg_std'])
+
+df = df.rename(columns={'value': 'value_1'})
+target_col_list = ['value_1']
+for i in range(2,8) :
+    new_name = f'value_{i}'
+    target_col_list.append(new_name)
+    df[new_name] = df['btc_vol_current'].shift(i)
+
 df = df.drop(df.index[0:2])
 df = df.drop(df.index[-31:])
-#df = df.drop(columns=['news_score_pos_std', 'news_score_neg_std'])
 
 
 def make_volatility_png():
@@ -109,7 +118,7 @@ def make_volatility_png():
     plot_histogram_volatility(df)
 
 def create_dataloader(batch_size, flag):
-    X_train, X_val, X_test, y_train, y_val, y_test = final_split(df, 'value', 0.1, 0.1)
+    X_train, X_val, X_test, y_train, y_val, y_test = final_split(df, target_col_list, 0.1, 0.1)
     #print(y_train.shape, y_val.shape, y_test.shape)
     #print((y_train['value']>=1).sum())
     #print((y_val['value']>=1).sum())

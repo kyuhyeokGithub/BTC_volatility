@@ -58,7 +58,7 @@ params:
     attn_type: None
     lr: 1e-5
     weight_decay: 1e-6
-    patience: 20
+    patience: 25
     n_epochs: 10000
 
 model_checkpoint:

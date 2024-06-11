@@ -25,7 +25,7 @@ def main(cfg):
                     cfg.params.dropout,cfg.params.nhead,cfg.params.attn_type,
                     cfg.params.lr,cfg.params.weight_decay, cfg.params.day_window)
     
-    ckpt_path = '/workspace/LFD_bitcoin_.py/modelcheckpoint/workspace/LFD_bitcoin/ckpt/epoch=12-val_loss=0.177.ckpt'
+    ckpt_path = './modelcheckpoint/workspace/LFD_bitcoin/ckpt/epoch=0-val_loss=0.536.ckpt'
     ckpt = torch.load(ckpt_path)
     model.load_state_dict(ckpt['state_dict'])
     model.eval()
@@ -40,8 +40,9 @@ def main(cfg):
         x = x.view([-1, cfg.params.feature_size, cfg.params.day_window])
         x = x.transpose(1,2)
         pred = model(x)
-        pred = pred.view(-1,1)
-
+        pred = pred.transpose(0,1).squeeze(-1)
+        pred = pred[:,0]
+        y = y[:,0]
         #print(pred, y)
         pred = pred ** (10/3)
         y = y ** (10/3)

@@ -10,24 +10,25 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, Ro
 from sklearn.model_selection import train_test_split
 
 
-def feature_label_split(df, target_col):
-    y = df[[target_col]]
-    X = df.drop(columns=[target_col])
+def feature_label_split(df, target_col_list):
+    y = df[target_col_list]
+    X = df.drop(columns=target_col_list)
     return X, y
 
-def train_val_test_split(df, target_col, test_ratio):
+def train_val_test_split(df, target_col_list, test_ratio):
     val_ratio = test_ratio / (1 - test_ratio)
-    X, y = feature_label_split(df, target_col)
+    X, y = feature_label_split(df, target_col_list)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_ratio, shuffle=False)
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=val_ratio, shuffle=False)
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 
 
-def final_split(df, target_col, val_ratio, test_ratio):
-    X, y = feature_label_split(df, target_col)
+def final_split(df, target_col_list, val_ratio, test_ratio):
+    X, y = feature_label_split(df, target_col_list)
     X_test, X_tmp, y_test, y_tmp = train_test_split(X, y, test_size=1-test_ratio, shuffle=False)
     X_val, X_train, y_val, y_train = train_test_split(X_tmp, y_tmp, test_size=((1-val_ratio-test_ratio)/(1-test_ratio)), shuffle=False)
+
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 
@@ -184,8 +185,8 @@ def MAPELoss(yhat, y):
 
 def plot_dataframe(df) :
     plt.figure(figsize = (10, 5))
-    plt.plot(df.index, df['value']**(10/3), linestyle='-', color='blue', marker='o', label='Volatility before Transformation')
-    plt.plot(df.index, df['value'], linestyle='-', color='red', marker = 'x', label='Volatility after Transformation')
+    plt.plot(df.index, df['value_1']**(10/3), linestyle='-', color='blue', marker='o', label='Volatility before Transformation')
+    plt.plot(df.index, df['value_1'], linestyle='-', color='red', marker = 'x', label='Volatility after Transformation')
     plt.title('Volatility change after Transformation')
     plt.xlabel('Date')
     plt.ylabel('Value')
@@ -201,8 +202,8 @@ def plot_histogram_volatility(df) :
 
     plt.figure(figsize = (10, 5))
 
-    plt.hist(df['value']**(10/3), bins=bins, alpha = 0.5, label='Volatility before Transformation', color = 'blue', edgecolor = 'k')
-    plt.hist(df['value'], bins=bins, alpha = 0.5, label='Volatility after Transformation', color = 'red', edgecolor = 'k')
+    plt.hist(df['value_1']**(10/3), bins=bins, alpha = 0.5, label='Volatility before Transformation', color = 'blue', edgecolor = 'k')
+    plt.hist(df['value_1'], bins=bins, alpha = 0.5, label='Volatility after Transformation', color = 'red', edgecolor = 'k')
 
     plt.title('Overlayed Histograms for Volatility Transformation')
     plt.xlabel('Volatility')

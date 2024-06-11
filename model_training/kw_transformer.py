@@ -35,7 +35,9 @@ class TransAm(pl.LightningModule):
         self.encoder_layer = nn.TransformerEncoderLayer(d_model=feature_size, nhead=nhead, dropout=dropout)
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)        
         #self.transformer_encoder = Encoder( input_size=50,heads=2, embedding_dim=feature_size, dropout_rate=dropout, N=num_layers)
+        self.fc = nn.Linear(self.day_window, 7)
         self.decoder = nn.Linear(feature_size,1)
+
         #self.save_hyperparameters("feature_size","batch_size", "learning_rate","weight_decay")   
         self.init_weights()
         self.save_hyperparameters()
@@ -43,16 +45,14 @@ class TransAm(pl.LightningModule):
         
         self.threshold = 1
         #print(self.threshold)
-        self.spike_classification = {}
-        self.spike_classification['TP'] = 0
-        self.spike_classification['FP'] = 0
-        self.spike_classification['FN'] = 0
-        self.spike_classification['TN'] = 0
+
         
 
     def init_weights(self):
-        initrange = 0.1    
+        initrange = 0.1
+        self.fc.bias.data.zero_()    
         self.decoder.bias.data.zero_()
+        self.fc.weight.data.uniform_(-initrange, initrange)
         self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def forward(self,src):
@@ -65,10 +65,13 @@ class TransAm(pl.LightningModule):
         src = self.pos_encoder(src)
 
         output = self.transformer_encoder(src.transpose(0,1), self.src_mask)#, self.src_mask)
-        output = torch.mean(output, dim=0)
+        output = output.transpose(0,2)
+        output = self.fc(output)
+        output = F.relu(output)
+        output = output.transpose(0,2)
+        
         output = self.decoder(output)
         #output=F.relu(output)
-
         #add sigmoid function <- output=sigmoid. force output to be 0-1. and 
         return output
 
@@ -112,9 +115,12 @@ class TransAm(pl.LightningModule):
         #print(x.shape)
         #print(y.shape)
         pred = self(x)
+
+        
+
         # The actual forward pass is made on the 
         #input to get the outcome pred from the model
-        pred = pred.view(-1,1)
+        pred = pred.transpose(0,1).squeeze(-1)
         loss = self.loss_fn1(pred, y)
         #print(f'[TRAIN] {pred}, {y}')
 
@@ -129,8 +135,10 @@ class TransAm(pl.LightningModule):
         #print(x.shape)
         #print(y.shape)
         pred = self(x)
+
         #print(pred.shape)
-        pred = pred.view(-1,1)
+        pred = pred.transpose(0,1).squeeze(-1)
+
         loss = self.loss_fn1(pred, y)
         self.log('val_loss', loss, prog_bar=True)
         #print('val_loss:',loss)
@@ -142,7 +150,7 @@ class TransAm(pl.LightningModule):
         x = x.view([-1, self.feature_size, self.day_window])
         x = x.transpose(1,2)        
         pred = self(x)
-        pred = pred.view(-1,1)
+        pred = pred.transpose(0,1).squeeze(-1)
 
         #print(pred, y)
         pred = pred ** (10/3)
