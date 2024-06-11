@@ -50,15 +50,15 @@ seed: null
 
 params:
     batch_size: 4
-    feature_size: 34
+    feature_size: 36
     num_layers: 2
     dropout: 0.2
     day_window : 10
-    nhead: 2
+    nhead: 4
     attn_type: None
     lr: 1e-5
     weight_decay: 1e-6
-    patience: 100
+    patience: 20
     n_epochs: 10000
 
 model_checkpoint:

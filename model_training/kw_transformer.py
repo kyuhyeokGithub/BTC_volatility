@@ -6,6 +6,7 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from kw_transformer_layers import PositionalEncoding
 import torch
 from torch import nn
+import torch.nn.functional as F
 from kw_TransformerEncoderLayer import TransformerEncoderLayer
 from dataloader import create_dataloader
 
@@ -23,7 +24,7 @@ class TransAm(pl.LightningModule):
         self.weight_decay=weight_decay
         self.day_window=day_window
         self.loss_fn = loss_fn
-        print(f'[batch_size x feature_size] {batch_size} x {feature_size}\n')   
+        print(f'[batch_size x feature_size] {batch_size} x {feature_size}\n')  
 
         self.src_mask = None
         self.pos_encoder = PositionalEncoding(feature_size)
@@ -31,6 +32,7 @@ class TransAm(pl.LightningModule):
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)        
         #self.transformer_encoder = Encoder( input_size=50,heads=2, embedding_dim=feature_size, dropout_rate=dropout, N=num_layers)
         self.decoder = nn.Linear(feature_size,1)
+        self.pooling = nn.Linear(day_window, 1)
         #self.save_hyperparameters("feature_size","batch_size", "learning_rate","weight_decay")   
         self.init_weights()
         self.save_hyperparameters()
@@ -56,10 +58,14 @@ class TransAm(pl.LightningModule):
             device = src.device
             mask = self._generate_square_subsequent_mask(len(src)).to(device)
             self.src_mask = mask
-
+        
         src = self.pos_encoder(src)
+
         output = self.transformer_encoder(src,self.src_mask)#, self.src_mask)
         output = self.decoder(output)
+        output=F.relu(output)
+        output = output.squeeze(-1)
+        output = self.pooling(output)
         #output=F.relu(output)
 
         #add sigmoid function <- output=sigmoid. force output to be 0-1. and 
@@ -100,7 +106,10 @@ class TransAm(pl.LightningModule):
         
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
-        x = x.view([self.batch_size, -1, self.feature_size]) 
+        x = x.view([self.batch_size, self.feature_size, -1]) 
+        x = x.transpose(1,2)
+        #print(x.shape)
+        #print(y.shape)
         pred = self(x)
         # The actual forward pass is made on the 
         #input to get the outcome pred from the model
@@ -108,14 +117,18 @@ class TransAm(pl.LightningModule):
         loss = self.loss_fn(pred, y)
         #print(f'[TRAIN] {pred}, {y}')
 
-
         self.log('training_loss', loss, prog_bar=True)
         return loss
 
+
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
-        x = x.view([self.batch_size, -1, self.feature_size])
+        x = x.view([self.batch_size,self.feature_size, -1])
+        x = x.transpose(1,2)        
+        #print(x.shape)
+        #print(y.shape)
         pred = self(x)
+        #print(pred.shape)
         pred = pred.view(-1,1)
         loss = self.loss_fn(pred, y)
         self.log('val_loss', loss, prog_bar=True)
@@ -125,15 +138,16 @@ class TransAm(pl.LightningModule):
     def test_step(self, test_batch, batch_idx, batch_size=1):
         x, y = test_batch
         
-        x = x.view([batch_size, -1, self.feature_size])
+        x = x.view([batch_size, self.feature_size, -1])
+        x = x.transpose(1,2)        
         pred = self(x)
         pred = pred.view(-1,1)
 
         print(pred, y)
         pred = pred ** (10/3)
         y = y ** (10/3)
-        print(pred, y)
-        print('-----------------')
+        #print(pred, y)
+        #print('-----------------')
         
         loss = self.loss_fn(pred, y)
         self.log('Test loss', loss, prog_bar=True)

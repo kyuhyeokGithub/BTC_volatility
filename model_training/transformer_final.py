@@ -37,6 +37,9 @@ from kw_transformer_functions import calculate_metrics, RMSELoss, RMSPELoss, plo
 
 from dataloader import make_volatility_png
 
+import warnings
+warnings.filterwarnings("ignore")
+
 @hydra.main(version_base='1.2',config_path="configs", config_name="train.yaml")
 def main(cfg):  
 

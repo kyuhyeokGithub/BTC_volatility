@@ -32,27 +32,15 @@ def final_split(df, target_col, val_ratio, test_ratio):
 
 
 def final_dataload(batch_size,X_train, X_val, X_test, y_train, y_val, y_test ):
-
-    X_train_arr = X_train
-    X_val_arr = X_val
-    X_test_arr = X_test
-
-    #print(y_test)
-    y_train_arr = y_train
-    y_val_arr = y_val
-    y_test_arr = y_test
-    #print(y_test)
-    #print((y_test>1).count())
-    #exit()
    
-    train_features = torch.Tensor(X_train_arr.values)
-    train_targets = torch.Tensor(y_train_arr.values)
+    train_features = torch.Tensor(X_train.values)
+    train_targets = torch.Tensor(y_train.values)
 
-    val_features = torch.Tensor(X_val_arr.values)
-    val_targets = torch.Tensor(y_val_arr.values)
+    val_features = torch.Tensor(X_val.values)
+    val_targets = torch.Tensor(y_val.values)
 
-    test_features = torch.Tensor(X_test_arr.values)
-    test_targets = torch.Tensor(y_test_arr.values)
+    test_features = torch.Tensor(X_test.values)
+    test_targets = torch.Tensor(y_test.values)
 
     train = TensorDataset(train_features, train_targets)
     val = TensorDataset(val_features, val_targets)
