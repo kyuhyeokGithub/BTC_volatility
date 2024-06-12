@@ -11,8 +11,6 @@ from transformer import TransAm
 
 from transformer_functions import MAELoss, MAPELoss, RMSELoss, RMSPELoss
 
-from dataloader import make_volatility_png
-
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -40,7 +38,7 @@ def main(cfg):
                     cfg.params.dropout,cfg.params.nhead,cfg.params.attn_type,
                     cfg.params.lr,cfg.params.weight_decay, cfg.params.day_window)
     
-    ckpt_path = '/workspace/LFD_bitcoin_.py/modelcheckpoint/workspace/LFD_bitcoin/ckpt/epoch=86-val_loss=0.196_wonews.ckpt'
+    ckpt_path = '/workspace/LFD_bitcoin/modelcheckpoint/workspace/LFD_bitcoin/ckpt/epoch=93-val_loss=0.190.ckpt'
     ckpt = torch.load(ckpt_path)
     model.load_state_dict(ckpt['state_dict'])
     model.eval()
