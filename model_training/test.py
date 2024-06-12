@@ -5,15 +5,30 @@ import torch
 from tqdm import tqdm
 import hydra
 import pytorch_lightning as pl
+import matplotlib.pyplot as plt
 
-from kw_transformer import TransAm
+from transformer import TransAm
 
-from kw_transformer_functions import MAELoss, MAPELoss, RMSELoss, RMSPELoss
+from transformer_functions import MAELoss, MAPELoss, RMSELoss, RMSPELoss
 
 from dataloader import make_volatility_png
 
 import warnings
 warnings.filterwarnings("ignore")
+
+def plot_result(gt, result) :
+    plt.figure(figsize = (10, 5))
+    bins = np.arange(0, len(gt))
+    plt.plot(bins, gt, linestyle='-', color='blue', marker='o', label='Ground Truth')
+    plt.plot(bins, result, linestyle='-', color='red', marker = 'x', label='Prediction')
+    plt.title('Volatility prediction')
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.legend(loc='upper right')
+    plt.grid(True)
+    #plt.show()
+    plt.savefig('./plot_result.png')
+
 
 @hydra.main(version_base='1.2',config_path="configs", config_name="train.yaml")
 def main(cfg):
@@ -25,7 +40,7 @@ def main(cfg):
                     cfg.params.dropout,cfg.params.nhead,cfg.params.attn_type,
                     cfg.params.lr,cfg.params.weight_decay, cfg.params.day_window)
     
-    ckpt_path = './modelcheckpoint/workspace/LFD_bitcoin/ckpt/epoch=0-val_loss=0.536.ckpt'
+    ckpt_path = '/workspace/LFD_bitcoin_.py/modelcheckpoint/workspace/LFD_bitcoin/ckpt/epoch=86-val_loss=0.196_wonews.ckpt'
     ckpt = torch.load(ckpt_path)
     model.load_state_dict(ckpt['state_dict'])
     model.eval()
@@ -49,8 +64,10 @@ def main(cfg):
         results.append(pred)
         gt.append(y)
     
-    results = torch.stack(results, dim=0)
-    gt = torch.stack(gt, dim=0)
+    results = torch.stack(results, dim=0).squeeze()
+    gt = torch.stack(gt, dim=0).squeeze()
+
+    plot_result(gt, results)
 
     rmse = RMSELoss(results, gt)
     rmspe = RMSPELoss(results, gt)

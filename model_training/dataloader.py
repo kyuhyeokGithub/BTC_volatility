@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 import yaml
-from kw_transformer_functions import *
+from transformer_functions import *
 
-from kw_transformer_functions import final_split, final_dataload
+from transformer_functions import final_split, final_dataload
 
 from warnings import simplefilter
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
@@ -49,7 +49,7 @@ df['log_returns'] = np.log(df['Close'] /df['Close'].shift(-1))
 eth_df  = pd.read_csv("./workspace/ether_norm.csv")
 eth_df['vol_current'] = df['log_returns'].rolling(window=2).std() * np.sqrt(365)
 eth_df['vol_current'] = eth_df['vol_current'] ** (0.3)
-eth_df.columns = ['eth_' + col.lower() if col not in ['HL_spread', 'OH_spread'] else 'eth_' + col for col in eth_df.columns]
+eth_df.columns = ['eth_' + col.lower() if col not in ['HL_spread', 'OC_spread'] else 'eth_' + col for col in eth_df.columns]
 eth_df = eth_df.rename(columns={'eth_date': 'date'})
 eth_df['date'] = pd.to_datetime(eth_df['date'])
 eth_df = eth_df.set_index(['date'])
@@ -62,7 +62,7 @@ usd_df  = pd.read_csv("./workspace/usdc_norm.csv")
 usd_df['vol_current'] = df['log_returns'].rolling(window=2).std() * np.sqrt(365)
 usd_df['vol_current'] = usd_df['vol_current'] ** (0.3)
 
-usd_df.columns = ['usd_' + col.lower() if col not in ['HL_spread', 'OH_spread'] else 'usd_' + col for col in usd_df.columns]
+usd_df.columns = ['usd_' + col.lower() if col not in ['HL_spread', 'OC_spread'] else 'usd_' + col for col in usd_df.columns]
 usd_df = usd_df.rename(columns={'usd_date': 'date'})
 usd_df['date'] = pd.to_datetime(usd_df['date'])
 usd_df = usd_df.set_index(['date'])
