@@ -99,9 +99,6 @@ if window > 1 :
             val = (-1) * i
             df[new_name] = df[col].shift(val)
 
-
-#df = df.drop(columns=['news_score_pos_std', 'news_score_neg_std'])
-
 df = df.rename(columns={'value': 'value_1'})
 target_col_list = ['value_1']
 for i in range(2,8) :
@@ -119,10 +116,6 @@ def make_volatility_png():
 
 def create_dataloader(batch_size, flag):
     X_train, X_val, X_test, y_train, y_val, y_test = final_split(df, target_col_list, 0.1, 0.1)
-    #print(y_train.shape, y_val.shape, y_test.shape)
-    #print((y_train['value']>=1).sum())
-    #print((y_val['value']>=1).sum())
-    #print((y_test['value']>=1).sum())
 
     train_loader, valid_loader , test_loader= final_dataload(batch_size, X_train, X_val, X_test, y_train, y_val, y_test)
 

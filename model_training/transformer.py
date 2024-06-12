@@ -7,7 +7,7 @@ from dataloader import create_dataloader
 from transformer_functions import MAELoss, MAPELoss, RMSELoss, RMSPELoss
 
 class TransAm(pl.LightningModule):
-    def __init__(self,loss_fn,batch_size=32,feature_size=1,num_layers=1,dropout=0.1,nhead=2,
+    def __init__(self, loss_fn, batch_size=32,feature_size=1,num_layers=1,dropout=0.1,nhead=2,
                  attn_type=None,learning_rate=1e-5,weight_decay=1e-6, day_window=10):
         super(TransAm, self).__init__()
        
@@ -19,6 +19,7 @@ class TransAm(pl.LightningModule):
         self.learning_rate=learning_rate
         self.weight_decay=weight_decay
         self.day_window=day_window
+        self.loss_fn = loss_fn
         self.loss_fn1 = RMSELoss
         self.loss_fn2 = RMSPELoss
         self.loss_fn3 = MAELoss
@@ -29,7 +30,6 @@ class TransAm(pl.LightningModule):
         self.pos_encoder = PositionalEncoding(feature_size)
         self.encoder_layer = nn.TransformerEncoderLayer(d_model=feature_size, nhead=nhead, dropout=dropout)
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)        
-        #self.transformer_encoder = Encoder( input_size=50,heads=2, embedding_dim=feature_size, dropout_rate=dropout, N=num_layers)
         self.fc = nn.Linear(self.day_window, 7)
         self.decoder = nn.Linear(feature_size,1)
 
@@ -98,7 +98,7 @@ class TransAm(pl.LightningModule):
         # The actual forward pass is made on the 
         #input to get the outcome pred from the model
         pred = pred.transpose(0,1).squeeze(-1)
-        loss = self.loss_fn1(pred, y)
+        loss = self.loss_fn(pred, y)
         #print(f'[TRAIN] {pred}, {y}')
 
         self.log('training_loss', loss, prog_bar=True)
@@ -113,7 +113,7 @@ class TransAm(pl.LightningModule):
 
         pred = pred.transpose(0,1).squeeze(-1)
 
-        loss = self.loss_fn1(pred, y)
+        loss = self.loss_fn(pred, y)
         self.log('val_loss', loss, prog_bar=True)
         #print('val_loss:',loss)
         return loss
@@ -126,21 +126,11 @@ class TransAm(pl.LightningModule):
         pred = self(x)
         pred = pred.transpose(0,1).squeeze(-1)
 
-        #print(pred, y)
         pred = pred ** (10/3)
         y = y ** (10/3)
-        #print(pred, y)
-        #print('-----------------')
-        
-        #print(pred, y)
-        #print(pred.shape, y.shape)
-        # rmse = self.loss_fn1(pred, y)
-        # rmspe = self.loss_fn2(pred, y)
+
         mae = self.loss_fn3(pred, y)
         mape = self.loss_fn4(pred, y)
-        # print(rmse, rmspe, mae, mape)
-        #exit()
-
 
         # self.log('Test loss RMSE', rmse, prog_bar=True)
         # self.log('Test loss RMSPE', rmspe, prog_bar=True)

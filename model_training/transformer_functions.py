@@ -6,7 +6,6 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from torch.utils.data import TensorDataset, DataLoader
 from plotly.offline import iplot
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 from sklearn.model_selection import train_test_split
 
 
@@ -22,8 +21,6 @@ def train_val_test_split(df, target_col_list, test_ratio):
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=val_ratio, shuffle=False)
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-
-
 def final_split(df, target_col_list, val_ratio, test_ratio):
     X, y = feature_label_split(df, target_col_list)
     X_test, X_tmp, y_test, y_tmp = train_test_split(X, y, test_size=1-test_ratio, shuffle=False)
@@ -31,8 +28,7 @@ def final_split(df, target_col_list, val_ratio, test_ratio):
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-
-def final_dataload(batch_size,X_train, X_val, X_test, y_train, y_val, y_test ):
+def final_dataload(batch_size, X_train, X_val, X_test, y_train, y_val, y_test):
    
     train_features = torch.Tensor(X_train.values)
     train_targets = torch.Tensor(y_train.values)
@@ -135,8 +131,6 @@ def calculate_metrics(df):
             'r2' : r2_score(df.value, df.prediction),
            'rmspe' : np.sqrt(np.mean(np.square(((df.value - df.prediction) / df.value)), axis=0))
            }
-
-
 
 def RMSELoss(yhat,y):
     return torch.sqrt(torch.mean((yhat-y)**2))
