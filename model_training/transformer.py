@@ -24,7 +24,7 @@ class TransAm(pl.LightningModule):
         self.loss_fn2 = RMSPELoss
         self.loss_fn3 = MAELoss
         self.loss_fn4 = MAPELoss
-        print(f'[batch_size x feature_size] {batch_size} x {feature_size}\n')  
+        #print(f'[batch_size x feature_size] {batch_size} x {feature_size}\n')  
 
         self.src_mask = None
         self.pos_encoder = PositionalEncoding(feature_size)

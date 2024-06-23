@@ -44,7 +44,7 @@ def main(cfg):
                                       ,save_top_k=1, monitor="val_loss")
   
 
-    logger = MLFlowLogger(experiment_name='kh_experiment' ,save_dir="./loggercheckpoint",run_name="transformer_normal_2")
+    logger = MLFlowLogger(experiment_name='experiment' ,save_dir="./loggercheckpoint",run_name="transformer_normal_2")
 
     trainer = pl.Trainer(callbacks=[TQDMProgressBar(refresh_rate=10),early_stop_callback,checkpoint_callback], 
                          max_epochs=cfg.params.n_epochs,
@@ -52,7 +52,7 @@ def main(cfg):
                          logger=logger,
                          accelerator='cpu', 
                         #  devices=-1
-                         )
+                        )
 
     make_volatility_png()
 

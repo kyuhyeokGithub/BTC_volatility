@@ -38,7 +38,7 @@ def main(cfg):
                     cfg.params.dropout,cfg.params.nhead,cfg.params.attn_type,
                     cfg.params.lr,cfg.params.weight_decay, cfg.params.day_window)
     
-    ckpt_path = '/workspace/LFD_bitcoin/modelcheckpoint/workspace/LFD_bitcoin/ckpt/epoch=93-val_loss=0.190.ckpt'
+    ckpt_path = './modelcheckpoint/workspace/LFD_bitcoin/ckpt/epoch=93-val_loss=0.190.ckpt'
     ckpt = torch.load(ckpt_path)
     model.load_state_dict(ckpt['state_dict'])
     model.eval()
